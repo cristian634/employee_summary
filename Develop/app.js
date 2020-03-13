@@ -11,7 +11,59 @@ const outputPath = path.join(OUTPUT_DIR, "team.html");
 const render = require("./lib/htmlRenderer");
 
 let employeeList = [];
-function init() {
+function newEmployee() {
+    inquirer
+        .prompt([
+            {
+                type: "list",
+                message: "Select employee role: ",
+                name: "role",
+                choices: ["Intern", "Engineer", "Manager", "Done"]
+            }
+        ]).then(function (response) {
+            console.log(response.role);
+            switch (response.role) {
+                case "Intern":
+                    newIntern();
+                    break;
+                case "Engineer":
+                    newEnginer();
+                    break;
+                case "Manager":
+                    newManager();
+                    break;
+                case "Done":
+                    saveList();
+            };
+
+        }).catch(err => console.log(err));
+
+    console.log(employeeList);
+};
+function newFile(employeeList){ 
+    fs.writeFile(outputPath, employeeList, function (err) {
+        if (err) throw err;
+    });
+};
+
+function saveList() {
+    console.log("Finished creating employees... making directory: ");
+    console.log("Employees created: " + employeeList);
+    if (!fs.existsSync(OUTPUT_DIR)) {
+        fs.mkdirSync(OUTPUT_DIR);
+        var htmlRender = render(employeeList);
+        newFile(htmlRender);
+
+    }
+    else {
+        var htmlRender = render(employeeList);
+        newFile(htmlRender);
+    }
+
+};
+
+function newManager() {
+    console.log("New Manager");
     inquirer
         .prompt(
             [
@@ -31,82 +83,85 @@ function init() {
                     name: "email"
                 },
                 {
-                    type: "list",
-                    message: "Select employee role: ",
-                    name: "role",
-                    choices: ["Intern", "Engineer", "Magaer"]
+                    type: "input",
+                    message: "Enter manager's office number: ",
+                    name: "officeNumber"
                 }
-            ]
-        )
-        .then(function ({ name, id, email, role }) {
-            switch (role) {
-                case Intern:
-                    inquirer.prompt([
-                        {
-                            type: "input",
-                            message: "Enter intern's school: ",
-                            name: "school"
-                        }
-                    ]).then(function ({ school }) {
-                        const newIntern = new Intern(name, id, email, school);
-                        employeeList.push(newIntern);
-                        return newIntern;
+            ]).then(function (response) {
+                let manager = new Manager(reponse.name, response.id, response.email, response.officeNumber);
+                employeeList.push(manager);
+                console.log(manager);
+                newEmployee();
+            });
+    
+};
 
-                    });
-                case Engineer:
-                    inquirer.prompt([
-                        {
-                            type: "input",
-                            message: "Enter engineer's Github account: ",
-                            name: "github"
-                        }
-                    ]).then(function ({ github }) {
-                        const newEngineer = new Engineer(name, id, email, github);
-                        employeeList.push(newEngineer);
-                        return newEngineer;
+function newEnginer() {
+    console.log("New Engineer");
+    inquirer
+        .prompt(
+            [
+                {
+                    type: "input",
+                    message: "Enter employee name: ",
+                    name: "name"
+                },
+                {
+                    type: "input",
+                    message: "Enter employee ID: ",
+                    name: "id"
+                },
+                {
+                    type: "input",
+                    message: "Enter employee email: ",
+                    name: "email"
+                },
+                {
+                    type: "input",
+                    message: "Enter engineer's Github account: ",
+                    name: "github"
+                }
+            ]).then(function (response) {
+                let engineer = new Engineer(response.name, response.id, response.email, response.github);
+                employeeList.push(engineer);
+                console.log(engineer);
+                newEmployee();
 
-                    });
-                case Manager:
-                    inquirer.prompt([
-                        {
-                            type: "input",
-                            message: "Enter manager's office number: ",
-                            name: "officeNumber"
-                        }
-                    ]).then(function ({ officeNumber }) {
-                        const newManager = new Manager(name, id, email, officeNumber);
-                        employeeList.push(newManager);
-                        return newManager;
+            });
+};
 
-                    });
+function newIntern() {
+    console.log("New Intern");
+    inquirer
+        .prompt(
+            [
+                {
+                    type: "input",
+                    message: "Enter employee name: ",
+                    name: "name"
+                },
+                {
+                    type: "input",
+                    message: "Enter employee ID: ",
+                    name: "id"
+                },
+                {
+                    type: "input",
+                    message: "Enter employee email: ",
+                    name: "email"
+                },
+                {
+                    type: "input",
+                    message: "Enter intern's school: ",
+                    name: "school"
+                }
+            ]).then(function (response) {
+                let intern = new Intern(response.name, response.id, response.email, response.school);
+                employeeList.push(intern);
+                console.log(intern);
+                newEmployee();
 
-            }
-        })
-}
+            });
+};
 
-module.exports = {newIntern, newEngineer, newManager};
-
-init();
-
-// Write code to use inquirer to gather information about the development team members,
-// and to create objects for each team member (using the correct class as blueprints!)
-
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
-
-// After you have your html, you're now ready to create an HTML file using the HTML
-// returned from the `render` function. Now write it to a file named `team.html` in the
-// `output` folder. You can use the variable `outputPath` above target this location.
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.
-
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different questions via inquirer depending on
-// employee type.
-
-// HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
-// and Intern classes should all extend from a class named Employee; see the directions
-// for further information. Be sure to test out each class and verify it generates an 
-// object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work!```
+newEmployee();

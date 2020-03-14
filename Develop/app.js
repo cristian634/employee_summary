@@ -88,7 +88,7 @@ function newManager() {
                     name: "officeNumber"
                 }
             ]).then(function (response) {
-                let manager = new Manager(reponse.name, response.id, response.email, response.officeNumber);
+                let manager = new Manager(response.name, response.id, response.email, response.officeNumber);
                 employeeList.push(manager);
                 console.log(manager);
                 newEmployee();
